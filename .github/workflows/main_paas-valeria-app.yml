@@ -1,56 +1,31 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy Node.js app to Azure Web App - paas-valeria-app
+name: Build and deploy Node.js app to Azure Web App
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read #This is required for actions/checkout
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Set up Node.js version
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '24.x'
+          node-version: '20'
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy to Azure
+        uses: azure/webapps-deploy@v2
         with:
-          name: node-app
-          path: .
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: node-app
-      
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_2765913D6B844086AF33AC16BEC691E0 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_C20355D3E8774D81B25CAF9DB1BF43EF }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AF820DF618D044D485B25952E35E54A2 }}
-
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
+          app-name: paas-valeria-app
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'paas-valeria-app'
@@ -58,3 +33,4 @@ jobs:
           package: .
 
           
+
